@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: Xuy123
+    ports:
+      - 5432:5432
