@@ -12,7 +12,7 @@ engine = create_engine(str(settings.postgres_url))
 
 @contextmanager
 async def get_session() -> Session:
-    session: Session = Session(engine)
+    session = Session(engine)
     try:
         yield session
         session.commit()
