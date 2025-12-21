@@ -20,3 +20,8 @@ async def get_session() -> AsyncSession:
             raise
         finally:
             await session.close()
+
+
+async def get_db_session() -> AsyncSession:
+    async with get_session() as session:
+        yield session

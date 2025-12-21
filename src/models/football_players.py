@@ -1,6 +1,6 @@
 from typing import List
 import sqlalchemy as sa
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, text
 from uuid import UUID, uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.clubsandplayers import joined_table
