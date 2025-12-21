@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from pydantic import PostgresDsn, Field
 from pydantic_settings import BaseSettings
@@ -6,7 +7,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
                 #валидация connect str
-    postgres_url: PostgresDsn = Field(env='postgres_url')
+    postgres_url: PostgresDsn = Field(env='POSTGRES_URL')
 
     class Config:
-        env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+        env_file = Path(__file__).resolve().parent.parent.parent / ".env"
