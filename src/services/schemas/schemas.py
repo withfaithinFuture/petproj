@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import Field, BaseModel
 from uuid import UUID
 from decimal import Decimal
@@ -16,6 +16,14 @@ class ClubSchema(BaseModel):
     class Config:
         from_attributes = True #принятие не только словарей но и других объектов с аттр
 
+
+class ClubSchemaUpdate(BaseModel):
+    id: UUID
+    name: None | str = Field(min_length=3,  pattern=letters, default=None)
+    home_town: None | str = Field(min_length=3,  pattern=letters, default=None)
+    creation_date: None | datetime.date = Field(default=None)
+
+
 class PlayerSchema(BaseModel):
     first_name: str = Field(min_length=3, pattern=letters)
     last_name: str = Field(min_length=3, pattern=letters)
@@ -23,6 +31,14 @@ class PlayerSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PlayerSchemaUpdate(BaseModel):
+    id: UUID
+    first_name: None | str = Field(min_length=3, pattern=letters)
+    last_name: None | str = Field(min_length=3, pattern=letters)
+    played_in_club: None | datetime.date
+
 
 #биржа + владелец (1 к 1)
 class ExchangeOwnerSchema(BaseModel):

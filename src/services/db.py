@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
-from sqlalchemy import create_engine
+from typing import Any, AsyncGenerator
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
-from sqlalchemy.orm import Session
 from app.config import Settings
 
 settings = Settings()
@@ -9,8 +8,8 @@ settings = Settings()
 engine = create_async_engine(str(settings.postgres_url).replace("postgresql://", "postgresql+asyncpg://"))
 new_session = async_sessionmaker(engine, expire_on_commit=False)
 
-@asynccontextmanager
-async def get_session() -> AsyncSession:
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with new_session() as session:
         try:
             yield session
@@ -21,7 +20,3 @@ async def get_session() -> AsyncSession:
         finally:
             await session.close()
 
-
-async def get_db_session() -> AsyncSession:
-    async with get_session() as session:
-        yield session
