@@ -1,4 +1,3 @@
-from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
 from app.config import Settings

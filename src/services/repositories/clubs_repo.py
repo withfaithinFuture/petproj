@@ -1,10 +1,7 @@
-from uuid import UUID
-
-from fastapi import HTTPException
-from fastapi.params import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from services.exceptions import NothingExists
 from src.services.repositories.ready_info import ReadyInfoForAddRepo
 from src.services.schemas.schemas import PlayerSchemaUpdate
 from src.services.schemas.schemas import ClubSchemaUpdate
@@ -39,7 +36,7 @@ class ClubFootballersRepository:
     @classmethod
     async def update_clubs_info(cls, update_sch: ClubSchemaUpdate, db_session: AsyncSession):
         update_sch_dict = update_sch.model_dump(exclude_none=True)
-        query = select(Club).where(Club.id == update_sch.id)
+        query = select(Club).where(Club.id == update_sch.id).options(selectinload(Club.players))
         result = await db_session.execute(query)
         existing_club = result.scalar_one_or_none()
 
@@ -47,7 +44,10 @@ class ClubFootballersRepository:
             if hasattr(existing_club, key):
                 setattr(existing_club, key, value)
 
-        return update_sch
+        await db_session.flush()
+        await db_session.refresh(existing_club)
+
+        return ClubSchema.model_validate(existing_club)
 
 
     @classmethod
@@ -73,11 +73,12 @@ class ClubFootballersRepository:
         existing_club, existing_player = result1.scalar_one_or_none(), result2.scalar_one_or_none()
 
         if existing_club is None and existing_player is None:
-            raise HTTPException(status_code=404, detail="Введите id существующего игрока или клуба!")
+            raise NothingExists(delete_id)
 
         elif existing_club:
             await db_session.delete(existing_club)
             return existing_club
+
         else:
             await db_session.delete(existing_player)
             return existing_player

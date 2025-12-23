@@ -1,13 +1,12 @@
-from uuid import UUID
-
-from fastapi import HTTPException, Depends
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from src.services.exceptions import ClubValidationError, PlayerValidationError
 from src.models.football_players import Player
 from services.db import get_session
 from src.models.clubs import Club
 from src.services.schemas.schemas import ClubSchemaUpdate, PlayerSchemaUpdate
+
 
 
 async def validate_exist_club(data: ClubSchemaUpdate, session: AsyncSession = Depends(get_session)):
@@ -18,7 +17,7 @@ async def validate_exist_club(data: ClubSchemaUpdate, session: AsyncSession = De
     existing_club = result.scalar_one_or_none()
 
     if not existing_club:
-        raise HTTPException(status_code=404, detail="Введите id существующего клуба!")
+        raise ClubValidationError(club_id)
 
     return data
 
@@ -31,7 +30,6 @@ async def validate_exist_player(data: PlayerSchemaUpdate, session: AsyncSession 
     existing_player = result.scalar_one_or_none()
 
     if not existing_player:
-        raise HTTPException(status_code=404, detail="Введите id существующего игрока!")
+        raise PlayerValidationError(player_id)
 
     return data
-

@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional
+from typing import List
 from pydantic import Field, BaseModel
 from uuid import UUID
 from decimal import Decimal
@@ -42,15 +42,21 @@ class PlayerSchemaUpdate(BaseModel):
 
 #биржа + владелец (1 к 1)
 class ExchangeOwnerSchema(BaseModel):
-    first_name: str = Field(min_length=3, pattern=letters)
-    last_name: str = Field(min_length=3, pattern=letters)
+    first_name: str = Field(min_length=2, pattern=letters)
+    last_name: str = Field(min_length=2, pattern=letters)
+
+    class Config:
+        from_attributes = True
 
 
 class ExchangeSchema(BaseModel):
     owner: ExchangeOwnerSchema
-    name: str = Field(min_length=3, pattern=letters)
+    exchange_name: str = Field(min_length=2, pattern=letters)
     work_in_Russia: bool
     volume: float
+
+    class Config:
+        from_attributes = True
 
 
 #юзеры и акции (1 к многие)
