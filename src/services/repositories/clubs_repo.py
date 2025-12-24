@@ -1,9 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from services.exceptions import NothingExists
+from src.services.exceptions import NothingExists
 from src.services.repositories.ready_info import ReadyInfoForAddRepo
-from src.services.schemas.schemas import PlayerSchemaUpdate
+from src.services.schemas.schemas import PlayerSchemaUpdate, PlayerSchema
 from src.services.schemas.schemas import ClubSchemaUpdate
 from src.models.football_players import Player
 from src.services.schemas.schemas import ClubSchema
@@ -22,7 +22,7 @@ class ClubFootballersRepository:
         await db_session.flush()
         await db_session.refresh(club)
 
-        return club_data
+        return ClubSchema.model_validate(club_data)
 
 
     @classmethod
@@ -61,7 +61,10 @@ class ClubFootballersRepository:
             if hasattr(existing_player, key):
                 setattr(existing_player, key, value)
 
-        return update_player_sch
+        await db_session.flush()
+        await db_session.refresh(existing_player)
+
+        return PlayerSchema.model_validate(existing_player)
 
 
     @classmethod

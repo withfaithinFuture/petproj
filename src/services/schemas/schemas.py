@@ -4,7 +4,7 @@ from pydantic import Field, BaseModel
 from uuid import UUID
 from decimal import Decimal
 
-letters = r'^[A-Za-zА-Яа-яЁё\s]+$'
+letters = r'^[A-Za-zА-Яа-яЁё0-9\s\-]+$'
 
 #клуб + футболисты (многие ко многим)
 class ClubSchema(BaseModel):
@@ -77,8 +77,25 @@ class UserSchema(BaseModel):
     username: str = Field(min_length=3, pattern=letters)
     shares: List["SharesSchema"]
 
+class UserSchemaUpdate(BaseModel):
+    id: UUID
+    username: str = Field(min_length=3, pattern=letters)
+
+    class Config:
+        from_attributes = True
+
 class SharesSchema(BaseModel):
-    ticker: str = Field(min_length=2, pattern=letters)
-    quantity: float
-    purchase_price: Decimal
-    purchase_date: datetime.date
+    ticker: None | str = Field(min_length=2, pattern=letters)
+    quantity: float | int | None
+    purchase_price: Decimal | int | None
+    purchase_date: datetime.date | None
+
+class SharesSchemaUpdate(BaseModel):
+    id: UUID
+    ticker: None | str = Field(min_length=2, pattern=letters)
+    quantity: float | int | None
+    purchase_price: Decimal | int | None
+    purchase_date: datetime.date | None
+
+    class Config:
+        from_attributes = True
