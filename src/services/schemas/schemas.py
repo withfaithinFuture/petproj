@@ -58,6 +58,19 @@ class ExchangeSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class ExchangeUpdateSchema(BaseModel):
+    id: UUID
+    exchange_name: None | str = Field(min_length=2, pattern=letters)
+    work_in_Russia: None | bool
+    volume: None | float
+
+
+class ExchangeOwnerUpdateSchema(BaseModel):
+    id: UUID
+    first_name: str = Field(min_length=2, pattern=letters)
+    last_name: str = Field(min_length=2, pattern=letters)
+
+
 
 #юзеры и акции (1 к многие)
 class UserSchema(BaseModel):

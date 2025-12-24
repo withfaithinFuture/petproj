@@ -1,10 +1,14 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict
-from src.services.exceptions import NothingExists
+from src.services.exceptions import NothingExists, ExchangeValidateError, OwnerValidateError
 from src.services.repositories.exchanges_repo import ExchangesOwnersRepository
-from src.services.dependencies import validate_exist_player, ClubValidationError, PlayerValidationError
+from src.services.dependencies import validate_exist_player, ClubValidationError, PlayerValidationError, \
+    validate_exchange_exist, validate_owner_exist
 from src.services.dependencies import validate_exist_club
-from src.services.schemas.schemas import ClubSchemaUpdate, PlayerSchemaUpdate, ExchangeSchema
+from src.services.schemas.schemas import ClubSchemaUpdate, PlayerSchemaUpdate, ExchangeSchema, ExchangeUpdateSchema, \
+    ExchangeOwnerUpdateSchema
 from src.services.db import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.services.repositories.clubs_repo import ClubFootballersRepository
@@ -62,13 +66,44 @@ async def delete_by_id(delete_id, db_session: AsyncSession = Depends(get_session
 @router.post('/Биржа/Добавление биржи', tags=['Действия с биржами'])
 async def add_exchange(exchange_data: ExchangeSchema, db_session: AsyncSession = Depends(get_session)):
     new_exchange = await ExchangesOwnersRepository.add_exchange(exchange_data, db_session)
-    return new_exchange
+    return {'Exchange': new_exchange, 'HTTP status': 201}
 
-@router.get('/Биржа/Добавление биржи', tags=['Действия с биржами'])
+@router.get('/Биржа/Получение бирж', tags=['Действия с биржами'])
 async def get_exchanges(db_session: AsyncSession = Depends(get_session)):
     exchanges = await ExchangesOwnersRepository.get_exchanges_info(db_session)
-    return exchanges
+    return {"Exchanges": exchanges, 'HTTP status': 200}
 
-@router.patch('/Биржа/Добавление биржи', tags=['Действия с биржами'])
+@router.patch('/Биржа/Обновление биржи', tags=['Действия с биржами'])
 async def update_exchange(update_data: ExchangeUpdateSchema, db_session: AsyncSession = Depends(get_session)):
-    pass
+
+    try:
+        await validate_exchange_exist(update_data, db_session)
+        updated_exchange = await ExchangesOwnersRepository.update_exchange_info(update_data, db_session)
+        return {'New exchange info': updated_exchange, 'HTTP status': 200}
+
+    except ExchangeValidateError as e:
+        raise HTTPException(status_code=404, detail={'error': str(e)})
+
+
+@router.patch('/Биржа/Обновление создателя биржи', tags=['Действия с биржами'])
+async def update_owner(update_data: ExchangeOwnerUpdateSchema, db_session: AsyncSession = Depends(get_session)):
+
+    try:
+        await validate_owner_exist(update_data, db_session)
+        updated_owner = await ExchangesOwnersRepository.update_owner_info(update_data, db_session)
+        return {'New owner info': updated_owner, 'HTTP status': 200}
+
+    except OwnerValidateError as e:
+        raise HTTPException(status_code=404, detail={'error': str(e)})
+
+
+@router.post('/Биржа/Удаление биржи с создателем', tags=['Действия с биржами'])
+async def delete_exchange(delete_id: UUID, db_session: AsyncSession = Depends(get_session)):
+
+    try:
+        deleted_object = await ExchangesOwnersRepository.delete_exchange_info(delete_id, db_session)
+        return deleted_object
+
+    except NothingExists as e:
+        raise HTTPException(status_code=404, detail={'error': str(e)})
+

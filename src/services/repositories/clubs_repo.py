@@ -66,19 +66,15 @@ class ClubFootballersRepository:
 
     @classmethod
     async def delete_club_or_player(cls, delete_id, db_session: AsyncSession):
-        query1 = select(Club).where(Club.id == delete_id)
-        query2 = select(Player).where(Player.id == delete_id)
-        result1 = await db_session.execute(query1)
-        result2 = await db_session.execute(query2)
-        existing_club, existing_player = result1.scalar_one_or_none(), result2.scalar_one_or_none()
+        club_by_id = await db_session.get(Club, delete_id)
+        if club_by_id is not None:
+            await db_session.delete(club_by_id)
+            return club_by_id
 
-        if existing_club is None and existing_player is None:
-            raise NothingExists(delete_id)
-
-        elif existing_club:
-            await db_session.delete(existing_club)
-            return existing_club
+        player = await db_session.get(Player, delete_id)
+        if player is not None:
+            await db_session.delete(player)
+            return player
 
         else:
-            await db_session.delete(existing_player)
-            return existing_player
+            raise NothingExists(delete_id)
