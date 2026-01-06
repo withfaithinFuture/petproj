@@ -2,7 +2,6 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-
 from src.services.exceptions import NothingExists
 from src.models.exchange_owners import Owner
 from src.models.exchanges import Exchange
