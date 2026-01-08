@@ -3,7 +3,7 @@ from sqlalchemy import ForeignKey
 from uuid import UUID, uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.services.data_service import Base
-
+#w
 
 class Exchange(Base):
     __tablename__ = 'exchanges'
